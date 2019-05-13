@@ -30,7 +30,7 @@ object StreamingDataToRedisScala {
     }
 
     override def getValueFromData(data: (String, String)): String = {
-          data._2
+      data._2
     }
 
     override def getKeyFromData(data: (String, String)): String = {
