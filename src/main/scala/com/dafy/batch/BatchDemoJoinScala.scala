@@ -13,7 +13,7 @@ object BatchDemoJoinScala {
     val data1 = ListBuffer[Tuple2[Int,String]]()
     data1.append((1,"Tom"))
     data1.append((2,"Jerry"))
-    data1.append((3,"Albert"))
+    data1.append((4,"Albert"))
     val text1 = env.fromCollection(data1)
 
     val data2 = ListBuffer[Tuple2[Int,String]]()
@@ -29,6 +29,15 @@ object BatchDemoJoinScala {
     text1.join(text2).where(0).equalTo(0).map((rs) => {
       (rs._1._1,rs._1._2,rs._2._2)
     }).sortPartition(_._2,Order.ASCENDING).print()
+
+    text1.leftOuterJoin(text2).where(0).equalTo(0).apply((first,second) => {
+      if(second == null){
+        (first._1,first._2,"unknow")
+      }else{
+        (first._1,first._2,second._2)
+      }
+    }).print()
+
   }
 
 }
