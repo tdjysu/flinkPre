@@ -8,7 +8,6 @@ object BatchDemoDistinctScala {
   def main(args: Array[String]): Unit = {
     val env = ExecutionEnvironment.getExecutionEnvironment
     import org.apache.flink.api.scala._
-
     val data =  ListBuffer[String]()
     data.append("Hello USA")
     data.append("Hello TW")

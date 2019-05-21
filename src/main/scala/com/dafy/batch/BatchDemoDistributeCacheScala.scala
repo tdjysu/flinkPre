@@ -21,6 +21,7 @@ object BatchDemoDistributeCacheScala {
 
     val result = data.map(new RichMapFunction[String,String] {
       val dataList = ListBuffer[String]()
+      val strBuf:StringBuffer = null
       override def open(parameters: Configuration): Unit = {
         super.open(parameters)
 //        使用文件
@@ -35,7 +36,12 @@ object BatchDemoDistributeCacheScala {
       }
 
       override def map(value: String): String = {
+        for(it<-dataList){
+          this.strBuf.append(it)
+        }
+        
         value
+
       }
     })
 
