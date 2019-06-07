@@ -18,6 +18,7 @@ public class StreamingKafkaSource {
 //      3 创建主题t1 bin\windows\kafka-topics.bat --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic t1
 //      4 查看主题 bin\windows\kafka-topics.bat --zookeeper 127.0.0.1:2181 --list
 //      5 创建生产者 bin\windows\kafka-console-producer.bat --broker-list localhost:9092 --topic t1
+//      6 创建消费者 bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic t1
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 //      checkpoint配置
         env.enableCheckpointing(5000);

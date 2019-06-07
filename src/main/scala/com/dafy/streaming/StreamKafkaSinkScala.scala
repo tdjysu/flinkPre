@@ -12,7 +12,6 @@ import org.apache.flink.streaming.util.serialization.KeyedSerializationSchemaWra
 object StreamKafkaSinkScalaScala {
   def main(args: Array[String]): Unit = {
 
-
     val env: StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
     env.enableCheckpointing(5000)
     env.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
@@ -23,16 +22,11 @@ object StreamKafkaSinkScalaScala {
 
 
     // 连接此socket获取输入数据
-    val text = env.socketTextStream("localhost", 10086, '\n')
+    val text = env.socketTextStream("localhost", 8686, '\n')
     val topic = "t1"
     val prop = new Properties
     prop.setProperty("bootstrap.servers", "localhost:9092")
-    prop.setProperty("transaction.max.timeout.ms",60000*15+"")
-
-
-//    val myConsumer = new FlinkKafkaConsumer011[String](topic,new SimpleStringSchema(),prop)
-//    val text = env.addSource(myConsumer)
-
+    prop.setProperty("transaction.timeout.ms",60000*15+"")
    val myProducer =  new FlinkKafkaProducer011[String](topic, new KeyedSerializationSchemaWrapper[String](new SimpleStringSchema()),prop,FlinkKafkaProducer011.Semantic.EXACTLY_ONCE)
 
     text.addSink(myProducer)
