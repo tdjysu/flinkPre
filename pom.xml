@@ -15,7 +15,7 @@
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <hadoop.version>2.7.6</hadoop.version>
-        <flink.version>1.6.1</flink.version>
+        <flink.version>1.7.1</flink.version>
     </properties>
     <dependencies>
         <dependency>
@@ -84,7 +84,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka-0.11_2.11</artifactId>
+            <artifactId>flink-connector-kafka_2.12</artifactId>
             <version>${flink.version}</version>
         </dependency>
 

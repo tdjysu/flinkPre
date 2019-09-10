@@ -5,7 +5,7 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.util.serialization.KeyedSerializationSchemaWrapper;
 
 import java.util.Properties;
@@ -36,7 +36,7 @@ public class StreamingKafkaSinkJava {
 //       使用至少一次语义(默认值)
 //        FlinkKafkaProducer011<String> myProducer =  new FlinkKafkaProducer011<>(brokerList,topic,new SimpleStringSchema());
 //        使用仅一次语义
-        FlinkKafkaProducer011<String> myProducer = new FlinkKafkaProducer011<String>(topic,new KeyedSerializationSchemaWrapper<String>(new SimpleStringSchema()),prop,FlinkKafkaProducer011.Semantic.EXACTLY_ONCE);
+        FlinkKafkaProducer<String> myProducer = new FlinkKafkaProducer<String>(topic,new KeyedSerializationSchemaWrapper<String>(new SimpleStringSchema()),prop,FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
 
         text.addSink(myProducer);
         env.execute(StreamingKafkaSinkJava.class.getName());

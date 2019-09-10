@@ -1,7 +1,8 @@
-package com.dafy.streaming
+package com.dafy.streaming.sink
 
 import java.util.Properties
 
+import com.dafy.streaming.StreamKafkaSinkScalaScala
 import org.apache.flink.api.common.serialization.SimpleStringSchema
 import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.environment.CheckpointConfig
@@ -9,7 +10,7 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer
 import org.apache.flink.streaming.util.serialization.KeyedSerializationSchemaWrapper
 
-object StreamKafkaSinkScalaScala {
+object StreamingCSVSinkafka {
   def main(args: Array[String]): Unit = {
 
     val env: StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
@@ -20,21 +21,20 @@ object StreamKafkaSinkScalaScala {
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
     env.getCheckpointConfig.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
 
-    //启动kafka  .\bin\windows\kafka-server-start.bat .\config\server.properties
-    //查看topic .\bin\windows\kafka-topics.bat --list --zookeeper localhost:2181
 
-    // 连接此socket获取输入数据
-    val text = env.socketTextStream("localhost", 8686, '\n')
+
+    val filePath = "c:/test/kafkadata.txt"
+    // 从本地文件读取数据
+    val text = env.readTextFile(filePath)
     val topic = "t1"
     val prop = new Properties
     prop.setProperty("bootstrap.servers", "localhost:9092")
     prop.setProperty("transaction.timeout.ms",60000*15+"")
-   val myProducer =  new FlinkKafkaProducer[String](topic, new KeyedSerializationSchemaWrapper[String](new SimpleStringSchema()),prop,FlinkKafkaProducer.Semantic.EXACTLY_ONCE)
+    val myProducer =  new FlinkKafkaProducer[String](topic, new KeyedSerializationSchemaWrapper[String](new SimpleStringSchema()),prop,FlinkKafkaProducer.Semantic.EXACTLY_ONCE)
 
     text.addSink(myProducer)
     env.execute(StreamKafkaSinkScalaScala.getClass.getName)
 
 
   }
-
 }
