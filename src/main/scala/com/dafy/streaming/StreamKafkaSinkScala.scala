@@ -19,9 +19,12 @@ object StreamKafkaSinkScalaScala {
     env.getCheckpointConfig.setCheckpointTimeout(60000)
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
     env.getCheckpointConfig.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
-
+    //启动zookeeper zkserver.cmd
     //启动kafka  .\bin\windows\kafka-server-start.bat .\config\server.properties
     //查看topic .\bin\windows\kafka-topics.bat --list --zookeeper localhost:2181
+    //kafka 生产者 .\bin\winodws\kafka-console-producer.bat --broker-list localhost:9092 --topic t1
+    //kafka 消费者 .\bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic t1 --from-beginning
+
 
     // 连接此socket获取输入数据
     val text = env.socketTextStream("localhost", 8686, '\n')
