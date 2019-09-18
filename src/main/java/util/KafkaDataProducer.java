@@ -86,8 +86,8 @@ public class KafkaDataProducer {
 
       for( int i = 0;i<lincnt;i++){
           strloandate = KafkaDataProducer.getRandomDate();
-          strdeptcode = "0"+KafkaDataProducer.getRandomNum(8);
-          lamount =  KafkaDataProducer.getRandomNum(7);
+          strdeptcode = "0"+KafkaDataProducer.getRandomDeptCode(8);
+          lamount =  KafkaDataProducer.getRandomAmount(7);
 
           JSONObject newjson = new JSONObject();
           newjson.putAll(jsonObject);
@@ -135,7 +135,7 @@ public class KafkaDataProducer {
      * @param digit 位数
      * @return 随机生成digit位数的数字
      */
-    public static int getRandomNum(int digit) {
+    public static int getRandomAmount(int digit) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < digit; i++) {
             if (i == 0 && digit > 1)
@@ -144,6 +144,46 @@ public class KafkaDataProducer {
                 str.append(new Random().nextInt(10));
         }
         return Integer.valueOf(str.toString());
+    }
+
+    /**
+     * @param digit 位数
+     * @return 随机生成digit位数的数字
+     */
+    public static String getRandomDeptCode(int digit) {
+        String[] deptArray = {"021302366",
+                "012322781",
+                "023721622",
+                "034222381",
+                "115023221",
+                "115123391",
+                "011510376",
+                "115220551",
+                "011502116",
+                "012322291",
+                "021301341",
+                "021316431",
+                "041303896",
+                "021421852",
+                "023713981",
+                "026120232",
+                "021302586",
+                "023705076",
+                "024121512",
+                "033201521",
+                "033522771",
+                "011521342",
+                "012122572",
+                "115231252",
+                "115334082",
+                "021419912",
+                "034222921",
+                "041303676",
+                "041323411",
+                "021421632"};
+        Random random = new Random();
+        int i = random.nextInt(deptArray.length);
+        return deptArray[i];
     }
  }
 
