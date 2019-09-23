@@ -7,7 +7,7 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema
 import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
 import org.apache.flink.streaming.util.serialization.KeyedSerializationSchemaWrapper
 
 object StreamingCSVSinkafka {
@@ -30,7 +30,7 @@ object StreamingCSVSinkafka {
     val prop = new Properties
     prop.setProperty("bootstrap.servers", "localhost:9092")
     prop.setProperty("transaction.timeout.ms",60000*15+"")
-    val myProducer =  new FlinkKafkaProducer[String](topic, new KeyedSerializationSchemaWrapper[String](new SimpleStringSchema()),prop,FlinkKafkaProducer.Semantic.EXACTLY_ONCE)
+    val myProducer =  new FlinkKafkaProducer011[String](topic, new KeyedSerializationSchemaWrapper[String](new SimpleStringSchema()),prop,FlinkKafkaProducer011.Semantic.EXACTLY_ONCE)
 
     text.addSink(myProducer)
     env.execute(StreamKafkaSinkScalaScala.getClass.getName)

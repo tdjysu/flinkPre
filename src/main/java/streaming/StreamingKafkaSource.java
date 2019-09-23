@@ -5,8 +5,7 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 
 
 import java.util.Properties;
@@ -38,7 +37,7 @@ public class StreamingKafkaSource {
         Properties prop = new Properties();
         prop.setProperty("bootstrap.servers","192.168.8.206:9092");
         prop.setProperty("group.id","con1");
-        FlinkKafkaConsumer<String> myConsumer = new FlinkKafkaConsumer<>(topic,new SimpleStringSchema(),prop);
+        FlinkKafkaConsumer011<String> myConsumer = new FlinkKafkaConsumer011<String>(topic,new SimpleStringSchema(),prop);
         myConsumer.setStartFromGroupOffsets();//默认消费策略
         DataStreamSource<String> text = env.addSource(myConsumer);
         text.print();
