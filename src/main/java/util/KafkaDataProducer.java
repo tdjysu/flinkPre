@@ -86,8 +86,8 @@ public class KafkaDataProducer {
 
       for( int i = 0;i<lincnt;i++){
           strloandate = KafkaDataProducer.getRandomDate();
-          strdeptcode = "0"+KafkaDataProducer.getRandomDept();
-          lamount =  KafkaDataProducer.getRandomAmount(7);
+          strdeptcode = "0"+KafkaDataProducer.getRandomNum(8);
+          lamount =  KafkaDataProducer.getRandomNum(7);
 
           JSONObject newjson = new JSONObject();
           newjson.putAll(jsonObject);
@@ -135,21 +135,7 @@ public class KafkaDataProducer {
      * @param digit 位数
      * @return 随机生成digit位数的数字
      */
-    public static String getRandomDept() {
-        String [] types = {"114523201","012122931","115327801","021302456","033222102","011516832","012313390","021302836","012101956",
-                "021437832","033417601","034222031","021204816","021315681","041303546","115140231","012100111","012101846","034201701",
-                "021417762","026122522","012112430","012113560","035305096","041303436","041304566","023734612","033323071","041303816",
-                "033501711"};
-        Random random = new Random();
-        int i = random.nextInt(types.length);
-        return types[i];
-    }
-
-    /**
-     * @param digit 位数
-     * @return 随机生成digit位数的数字
-     */
-    public static int getRandomAmount(int digit) {
+    public static int getRandomNum(int digit) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < digit; i++) {
             if (i == 0 && digit > 1)
