@@ -84,7 +84,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka_2.12</artifactId>
+            <artifactId>flink-connector-kafka-0.11_2.11</artifactId>
             <version>${flink.version}</version>
         </dependency>
 
@@ -99,7 +99,6 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.25</version>
         </dependency>
-
     </dependencies>
     <build>
         <plugins>

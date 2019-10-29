@@ -12,8 +12,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.Future;
 
 public class pushKafkaMsg implements Runnable {
@@ -42,34 +45,42 @@ public class pushKafkaMsg implements Runnable {
         for (int i = 0; i < count; i++) {
             String runtime = new Date().toString();
 
-            File file = new File("C:/test/kafkadata.txt");
+            File file = new File("C:/test/UPDATE.json");
             BufferedReader reader = null;
             try {
                 reader = new BufferedReader(new FileReader(file));
-                String tempString = null;
+                String tempString = reader.readLine();
                 int line = 1;
                 JSONObject jsonObject;
+                DateFormat df= new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
                 //一次读入一行，直到读入null为文件结束
-                while ((tempString = reader.readLine()) != null) {
+                while (line <= 100000) {
                     //显示行号
 
-                     jsonObject = JSONObject.parseObject(tempString);
-                     String deptcode = jsonObject.getJSONObject("strdeptcode").getString("value");
-                     int fundcode = jsonObject.getJSONObject("nborrowmode").getInteger("value");
-                     String loandate = jsonObject.getJSONObject("strloandate").getString("value");
-                     int nstate = jsonObject.getJSONObject("nstate").getInteger("value");
-
+                    jsonObject = JSONObject.parseObject(tempString);
+                    String intentID = new Random().nextInt(100000)+"";
+                    String deptcode = jsonObject.getJSONObject("strdeptcode").getString("value");
+                    int fundcode = jsonObject.getJSONObject("nborrowmode").getInteger("value");
+                    Date loandate = df.parse(jsonObject.getJSONObject("strloandate").getString("value"));
+                    int nstate = jsonObject.getJSONObject("nstate").getInteger("value");
+                    int userid = jsonObject.getJSONObject("lborrowerid").getInteger("value");
+                    int lamount = jsonObject.getJSONObject("lamount").getInteger("value");
+                    String opFlag = jsonObject.getString("opFlag");
+                    JSONObject beforeData = jsonObject.getJSONObject("beforeRecord");
                     JSONObject newJson = new JSONObject();
-                    newJson.put("strdeptcode",deptcode);
-                    newJson.put("nborrowmode",fundcode);
-                    newJson.put("strloandate",loandate);
-                    newJson.put("nstate",nstate);
+                    newJson.put("strdeptcode",getRandomDept());
+                    newJson.put("nborrowmode",getRandomFund());
+                    newJson.put("strloandate",new Date());
+//                    newJson.put("strloandate",loandate);
+                    newJson.put("nstate",getRandomState());
+                    newJson.put("userid",randomInt(7));
+                    newJson.put("lamount",lamount);
                     ProducerRecord<String, String> data = new ProducerRecord<String, String>(topic, newJson.toJSONString());
                     String msg = "line " + line + ": " + newJson.toJSONString();
                     Future fututre = producer.send(data);
                     fututre.get();
 System.out.println("msg = " + msg);
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                     line++;
                 }
                 reader.close();
@@ -83,10 +94,51 @@ System.out.println("msg = " + msg);
                     }
                 }
             }
+
+
         }
         producer.close();
     }
 
+    public static int randomInt(int size) {
+        Random random = new Random();
+        if(size < 2){
+            return random.nextInt(10);
+        }
+        Double pow = Math.pow(10, size - 1);
+        int base = pow.intValue();
+        int number = base + random.nextInt(base * 9);
+        return number;
+    }
+
+    public static String getRandomDept(){
+        String deptcode = "";
+        String[] deptArray = {"114523201","012122931","115327801","021302456","033222102","011516832",
+                "012313390","021302836","012101956","021437832","033417601","034222031","021204816",
+                "021315681","041303546","115140231","012100111","012101846","034201701","021417762",
+                "026122522","012112430","012113560","035305096","041303436","041304566","023734612",
+                "033323071","041303816","033501711"};
+
+        String[] deptArray2 = {"114523201","012122931","115327801"};
+
+        deptcode = deptArray2[new Random().nextInt(3)];
+        return deptcode;
+    }
+
+
+    public static String getRandomFund(){
+        String strFund = "";
+        String[] fundArray = {"0","9","12","15","18","20"};
+        strFund = fundArray[new Random().nextInt(6)];
+        return strFund;
+    }
+
+    public static String getRandomState(){
+        String strState = "";
+        String[] stateArray = {"4","5","7","9","32","8"};
+        strState = stateArray[new Random().nextInt(6)];
+        return strState;
+    }
     public void run() {
         int j = 0;
         while (j < number) {
