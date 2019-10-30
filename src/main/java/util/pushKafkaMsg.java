@@ -55,7 +55,7 @@ public class pushKafkaMsg implements Runnable {
                 JSONObject jsonObject;
                 DateFormat df= new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 //              保存已插入kafka的数据记录
-                Map beforeRecordMap = new HashMap<String, DataBean>();
+                Map<String,DataBean> beforeRecordMap = new HashMap<String, DataBean>();
 
                 //一次读入一行，直到读入null为文件结束
                 while (line <= 100000) {
@@ -93,52 +93,82 @@ System.out.println("msg = " + msg);
     }
 
     //解析文本生成json
-    private JSONObject getJsonObject(String tempString, DateFormat df,Map beforeRecordMap) throws ParseException {
+    private JSONObject getJsonObject(String tempString, DateFormat df,Map<String,DataBean> beforeRecordMap) throws ParseException {
 
-
+        String intentID = new Random().nextInt(100000)+"";
+        String deptcode = getRandomDept();
+        int fundcode = getRandomFund();
+        Date loandate = new Date();
+        int nstate = getRandomState();
+        int userid = randomInt(7);
+        int lamount = randomInt(4)*100;
+        String opFlag = "I";//jsonObject.getString("opFlag");
+        JSONObject beforeDataJson = null;
+        JSONObject newJson = new JSONObject();
+        JSONObject oldJson = new JSONObject();
+        boolean isUpdate = false;
         if(beforeRecordMap.size() >= 50){//若已插入数据超过50条,则开启更新数据插入
             String[] keys = {"I","U","D","Q","C"};
             LocalDateTime curTime = LocalDateTime.now();
-            boolean isUpdate = false;
+
             if ("U".equals(new Random().nextInt(4))){
                 isUpdate = true;
+                opFlag = "U";
             }
-
-
-
         }
 
-        JSONObject jsonObject;
-        jsonObject = JSONObject.parseObject(tempString);
-        String intentID = new Random().nextInt(100000)+"";
-        String deptcode = jsonObject.getJSONObject("strdeptcode").getString("value");
-        int fundcode = jsonObject.getJSONObject("nborrowmode").getInteger("value");
-        Date loandate = df.parse(jsonObject.getJSONObject("strloandate").getString("value"));
-        int nstate = jsonObject.getJSONObject("nstate").getInteger("value");
-        int userid = jsonObject.getJSONObject("lborrowerid").getInteger("value");
-        int lamount = jsonObject.getJSONObject("lamount").getInteger("value");
-        String opFlag = "I";//jsonObject.getString("opFlag");
-        JSONObject beforeData = jsonObject.getJSONObject("beforeRecord");
-        JSONObject newJson = new JSONObject();
-        newJson.put("strdeptcode",getRandomDept());
-        newJson.put("nborrowmode",getRandomFund());
-        newJson.put("strloandate",new Date());
+        if(isUpdate){//若是更新数据,则从已插入数据集合中取出旧数据拼装,并生成更新数据
+            int mapLength = beforeRecordMap.size();
+            intentID = beforeRecordMap.get( new Random().nextInt(mapLength)).toString();
+            DataBean beforeData = beforeRecordMap.get(intentID);
+            newJson.put("intentID",intentID);//新数据不修改
+            newJson.put("strdeptcode",beforeData.getDeptCode());//新数据不修改
+            newJson.put("nborrowmode",beforeData.getFundcode());//新数据不修改
+            newJson.put("strloandate",beforeData.getLoandate());//新数据不修改
 //                    newJson.put("strloandate",loandate);
-        newJson.put("nstate",getRandomState());
-        newJson.put("userid",randomInt(7));
-        newJson.put("lamount",lamount);
-        newJson.put("opFlag",opFlag);
+            newJson.put("nstate",nstate);
+            newJson.put("userid",beforeData.getUserid());//新数据不修改
+            newJson.put("lamount",lamount);
+            newJson.put("opFlag",opFlag);
 
-        DataBean currentDataBean = new DataBean();
-        currentDataBean.setIntentId(intentID);
-        currentDataBean.setDeptCode(deptcode);
-        currentDataBean.setFundcode(fundcode);
-        currentDataBean.setNstate(nstate);
-        currentDataBean.setUserid(userid);
-        currentDataBean.setLamount(lamount);
-        currentDataBean.setLoandate(loandate);
 
-        beforeRecordMap.put(currentDataBean.getIntentId(),currentDataBean);
+            oldJson.put("intentID",intentID);
+            oldJson.put("strdeptcode",beforeData.getDeptCode());
+            oldJson.put("nborrowmode",beforeData.getFundcode());
+            oldJson.put("strloandate",beforeData.getLoandate());
+            oldJson.put("nstate",beforeData.getNstate());
+            oldJson.put("userid",beforeData.getUserid());
+            oldJson.put("lamount",beforeData.getLamount());
+            oldJson.put("beforeRecord",oldJson);
+        }else {//若是插入数据,则生成新的数据
+
+
+            newJson.put("intentID",intentID);
+            newJson.put("strdeptcode",deptcode);
+            newJson.put("nborrowmode",fundcode);
+            newJson.put("strloandate",loandate);
+//                    newJson.put("strloandate",loandate);
+            newJson.put("nstate",nstate);
+            newJson.put("userid",userid);
+            newJson.put("lamount",lamount);
+            newJson.put("opFlag",opFlag);
+            newJson.put("beforeRecord",beforeDataJson);
+//          根据解析后的数据生成临时数据Bean
+            DataBean currentDataBean = new DataBean();
+            currentDataBean.setIntentId(intentID);
+            currentDataBean.setDeptCode(deptcode);
+            currentDataBean.setFundcode(fundcode);
+            currentDataBean.setNstate(nstate);
+            currentDataBean.setUserid(userid);
+            currentDataBean.setLamount(lamount);
+            currentDataBean.setLoandate(loandate);
+//          将数据Bean存入已插入数据集合中
+            beforeRecordMap.put(currentDataBean.getIntentId(),currentDataBean);
+        }
+
+
+
+
         return newJson;
     }
 
@@ -168,16 +198,16 @@ System.out.println("msg = " + msg);
     }
 
 
-    public static String getRandomFund(){
-        String strFund = "";
-        String[] fundArray = {"0","9","12","15","18","20"};
+    public static int getRandomFund(){
+        int strFund ;
+        int[] fundArray = {0,9,12,15,18,20};
         strFund = fundArray[new Random().nextInt(6)];
         return strFund;
     }
 
-    public static String getRandomState(){
-        String strState = "";
-        String[] stateArray = {"4","5","7","9","32","8"};
+    public static int getRandomState(){
+        int strState ;
+        int[] stateArray = {4,5,7,9,32,8};
         strState = stateArray[new Random().nextInt(6)];
         return strState;
     }
