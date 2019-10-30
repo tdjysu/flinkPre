@@ -2,6 +2,7 @@ package util;
 
 
 
+import DataBean.DataBean;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -13,10 +14,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Random;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.Future;
 
 public class pushKafkaMsg implements Runnable {
@@ -53,34 +54,25 @@ public class pushKafkaMsg implements Runnable {
                 int line = 1;
                 JSONObject jsonObject;
                 DateFormat df= new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+//              保存已插入kafka的数据记录
+                Map beforeRecordMap = new HashMap<String, DataBean>();
+
                 //一次读入一行，直到读入null为文件结束
                 while (line <= 100000) {
-                    //显示行号
-
-                    jsonObject = JSONObject.parseObject(tempString);
-                    String intentID = new Random().nextInt(100000)+"";
-                    String deptcode = jsonObject.getJSONObject("strdeptcode").getString("value");
-                    int fundcode = jsonObject.getJSONObject("nborrowmode").getInteger("value");
-                    Date loandate = df.parse(jsonObject.getJSONObject("strloandate").getString("value"));
-                    int nstate = jsonObject.getJSONObject("nstate").getInteger("value");
-                    int userid = jsonObject.getJSONObject("lborrowerid").getInteger("value");
-                    int lamount = jsonObject.getJSONObject("lamount").getInteger("value");
-                    String opFlag = jsonObject.getString("opFlag");
-                    JSONObject beforeData = jsonObject.getJSONObject("beforeRecord");
-                    JSONObject newJson = new JSONObject();
-                    newJson.put("strdeptcode",getRandomDept());
-                    newJson.put("nborrowmode",getRandomFund());
-                    newJson.put("strloandate",new Date());
-//                    newJson.put("strloandate",loandate);
-                    newJson.put("nstate",getRandomState());
-                    newJson.put("userid",randomInt(7));
-                    newJson.put("lamount",lamount);
+                    //解析文本生成Json数据
+                    JSONObject newJson = getJsonObject(tempString, df,beforeRecordMap);
+                    //生成kafka生产数据
                     ProducerRecord<String, String> data = new ProducerRecord<String, String>(topic, newJson.toJSONString());
                     String msg = "line " + line + ": " + newJson.toJSONString();
+                    //将数据发送至kafka
                     Future fututre = producer.send(data);
                     fututre.get();
 System.out.println("msg = " + msg);
                     Thread.sleep(1000);
+
+
+
+
                     line++;
                 }
                 reader.close();
@@ -98,6 +90,56 @@ System.out.println("msg = " + msg);
 
         }
         producer.close();
+    }
+
+    //解析文本生成json
+    private JSONObject getJsonObject(String tempString, DateFormat df,Map beforeRecordMap) throws ParseException {
+
+
+        if(beforeRecordMap.size() >= 50){//若已插入数据超过50条,则开启更新数据插入
+            String[] keys = {"I","U","D","Q","C"};
+            LocalDateTime curTime = LocalDateTime.now();
+            boolean isUpdate = false;
+            if ("U".equals(new Random().nextInt(4))){
+                isUpdate = true;
+            }
+
+
+
+        }
+
+        JSONObject jsonObject;
+        jsonObject = JSONObject.parseObject(tempString);
+        String intentID = new Random().nextInt(100000)+"";
+        String deptcode = jsonObject.getJSONObject("strdeptcode").getString("value");
+        int fundcode = jsonObject.getJSONObject("nborrowmode").getInteger("value");
+        Date loandate = df.parse(jsonObject.getJSONObject("strloandate").getString("value"));
+        int nstate = jsonObject.getJSONObject("nstate").getInteger("value");
+        int userid = jsonObject.getJSONObject("lborrowerid").getInteger("value");
+        int lamount = jsonObject.getJSONObject("lamount").getInteger("value");
+        String opFlag = "I";//jsonObject.getString("opFlag");
+        JSONObject beforeData = jsonObject.getJSONObject("beforeRecord");
+        JSONObject newJson = new JSONObject();
+        newJson.put("strdeptcode",getRandomDept());
+        newJson.put("nborrowmode",getRandomFund());
+        newJson.put("strloandate",new Date());
+//                    newJson.put("strloandate",loandate);
+        newJson.put("nstate",getRandomState());
+        newJson.put("userid",randomInt(7));
+        newJson.put("lamount",lamount);
+        newJson.put("opFlag",opFlag);
+
+        DataBean currentDataBean = new DataBean();
+        currentDataBean.setIntentId(intentID);
+        currentDataBean.setDeptCode(deptcode);
+        currentDataBean.setFundcode(fundcode);
+        currentDataBean.setNstate(nstate);
+        currentDataBean.setUserid(userid);
+        currentDataBean.setLamount(lamount);
+        currentDataBean.setLoandate(loandate);
+
+        beforeRecordMap.put(currentDataBean.getIntentId(),currentDataBean);
+        return newJson;
     }
 
     public static int randomInt(int size) {
