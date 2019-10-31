@@ -103,23 +103,24 @@ System.out.println("msg = " + msg);
         int userid = randomInt(7);
         int lamount = randomInt(4)*100;
         String opFlag = "I";//jsonObject.getString("opFlag");
-        JSONObject beforeDataJson = null;
+        JSONObject beforeDataJson = new JSONObject();
         JSONObject newJson = new JSONObject();
         JSONObject oldJson = new JSONObject();
         boolean isUpdate = false;
-        if(beforeRecordMap.size() >= 50){//若已插入数据超过50条,则开启更新数据插入
+        if(beforeRecordMap.size() >= 10){//若已插入数据超过50条,则开启更新数据插入
             String[] keys = {"I","U","D","Q","C"};
             LocalDateTime curTime = LocalDateTime.now();
 
-            if ("U".equals(new Random().nextInt(4))){
+            if ("U".equals(keys[new Random().nextInt(4)])){
                 isUpdate = true;
                 opFlag = "U";
             }
         }
 
         if(isUpdate){//若是更新数据,则从已插入数据集合中取出旧数据拼装,并生成更新数据
-            int mapLength = beforeRecordMap.size();
-            intentID = beforeRecordMap.get( new Random().nextInt(mapLength)).toString();
+            int mapLength = beforeRecordMap.size()-1;
+            String keystr = beforeRecordMap.keySet().toArray()[new Random().nextInt(mapLength)].toString();
+            intentID = keystr;
             DataBean beforeData = beforeRecordMap.get(intentID);
             newJson.put("intentID",intentID);//新数据不修改
             newJson.put("strdeptcode",beforeData.getDeptCode());//新数据不修改
@@ -132,6 +133,18 @@ System.out.println("msg = " + msg);
             newJson.put("opFlag",opFlag);
 
 
+            //          根据解析后的数据生成临时数据Bean
+            DataBean currentDataBean = new DataBean();
+            currentDataBean.setIntentId(intentID);
+            currentDataBean.setDeptCode(beforeData.getDeptCode());
+            currentDataBean.setFundcode(beforeData.getFundcode());
+            currentDataBean.setNstate(nstate);
+            currentDataBean.setUserid(beforeData.getUserid());
+            currentDataBean.setLamount(lamount);
+            currentDataBean.setLoandate(beforeData.getLoandate());
+//          将数据Bean存入已插入数据集合中
+            beforeRecordMap.put(currentDataBean.getIntentId(),currentDataBean);
+
             oldJson.put("intentID",intentID);
             oldJson.put("strdeptcode",beforeData.getDeptCode());
             oldJson.put("nborrowmode",beforeData.getFundcode());
@@ -139,7 +152,9 @@ System.out.println("msg = " + msg);
             oldJson.put("nstate",beforeData.getNstate());
             oldJson.put("userid",beforeData.getUserid());
             oldJson.put("lamount",beforeData.getLamount());
-            oldJson.put("beforeRecord",oldJson);
+            newJson.put("beforeRecord",oldJson);
+
+            return newJson;
         }else {//若是插入数据,则生成新的数据
 
 
