@@ -60,20 +60,18 @@ public class pushKafkaMsg implements Runnable {
                 //一次读入一行，直到读入null为文件结束
                 while (line <= 100000) {
                     //解析文本生成Json数据
-                    JSONObject newJson = getJsonObject(tempString, df,beforeRecordMap);
-                    //生成kafka生产数据
-                    ProducerRecord<String, String> data = new ProducerRecord<String, String>(topic, newJson.toJSONString());
-                    String msg = "line " + line + ": " + newJson.toJSONString();
-                    //将数据发送至kafka
-                    Future fututre = producer.send(data);
-                    fututre.get();
+                    List<JSONObject> jsons = getJsonObject(tempString, df,beforeRecordMap);
+                    for(JSONObject newJson:jsons){
+                        //生成kafka生产数据
+                        ProducerRecord<String, String> data = new ProducerRecord<String, String>(topic, newJson.toJSONString());
+                        String msg = "line " + line + ": " + newJson.toJSONString();
+                        //将数据发送至kafka
+                        Future fututre = producer.send(data);
+                        fututre.get();
 System.out.println("msg = " + msg);
+                        line++;
+                    }
                     Thread.sleep(1000);
-
-
-
-
-                    line++;
                 }
                 reader.close();
             } catch (Exception e) {
@@ -93,7 +91,7 @@ System.out.println("msg = " + msg);
     }
 
     //解析文本生成json
-    private JSONObject getJsonObject(String tempString, DateFormat df,Map<String,DataBean> beforeRecordMap) throws ParseException {
+    private List<JSONObject> getJsonObject(String tempString, DateFormat df,Map<String,DataBean> beforeRecordMap) throws ParseException {
 
         String intentID = new Random().nextInt(100000)+"";
         String deptcode = getRandomDept();
@@ -103,9 +101,11 @@ System.out.println("msg = " + msg);
         int userid = randomInt(7);
         int lamount = randomInt(4)*100;
         String opFlag = "I";//jsonObject.getString("opFlag");
-        JSONObject beforeDataJson = new JSONObject();
+        JSONObject beforeDataJson = null;
         JSONObject newJson = new JSONObject();
         JSONObject oldJson = new JSONObject();
+
+        List<JSONObject> jsonList = new ArrayList<JSONObject>();
         boolean isUpdate = false;
         if(beforeRecordMap.size() >= 10){//若已插入数据超过50条,则开启更新数据插入
             String[] keys = {"I","U","D","Q","C"};
@@ -118,9 +118,8 @@ System.out.println("msg = " + msg);
         }
 
         if(isUpdate){//若是更新数据,则从已插入数据集合中取出旧数据拼装,并生成更新数据
-            int mapLength = beforeRecordMap.size()-1;
-            String keystr = beforeRecordMap.keySet().toArray()[new Random().nextInt(mapLength)].toString();
-            intentID = keystr;
+            int mapLength = beforeRecordMap.size() - 1;
+            intentID = beforeRecordMap.keySet().toArray()[new Random().nextInt(mapLength)].toString();
             DataBean beforeData = beforeRecordMap.get(intentID);
             newJson.put("intentID",intentID);//新数据不修改
             newJson.put("strdeptcode",beforeData.getDeptCode());//新数据不修改
@@ -133,18 +132,6 @@ System.out.println("msg = " + msg);
             newJson.put("opFlag",opFlag);
 
 
-            //          根据解析后的数据生成临时数据Bean
-            DataBean currentDataBean = new DataBean();
-            currentDataBean.setIntentId(intentID);
-            currentDataBean.setDeptCode(beforeData.getDeptCode());
-            currentDataBean.setFundcode(beforeData.getFundcode());
-            currentDataBean.setNstate(nstate);
-            currentDataBean.setUserid(beforeData.getUserid());
-            currentDataBean.setLamount(lamount);
-            currentDataBean.setLoandate(beforeData.getLoandate());
-//          将数据Bean存入已插入数据集合中
-            beforeRecordMap.put(currentDataBean.getIntentId(),currentDataBean);
-
             oldJson.put("intentID",intentID);
             oldJson.put("strdeptcode",beforeData.getDeptCode());
             oldJson.put("nborrowmode",beforeData.getFundcode());
@@ -152,9 +139,10 @@ System.out.println("msg = " + msg);
             oldJson.put("nstate",beforeData.getNstate());
             oldJson.put("userid",beforeData.getUserid());
             oldJson.put("lamount",beforeData.getLamount());
+            oldJson.put("opFlag","US");//标识汇总减法
             newJson.put("beforeRecord",oldJson);
-
-            return newJson;
+            jsonList.add(newJson);
+            jsonList.add(oldJson);
         }else {//若是插入数据,则生成新的数据
 
 
@@ -179,12 +167,13 @@ System.out.println("msg = " + msg);
             currentDataBean.setLoandate(loandate);
 //          将数据Bean存入已插入数据集合中
             beforeRecordMap.put(currentDataBean.getIntentId(),currentDataBean);
+            jsonList.add(newJson);
         }
 
 
 
 
-        return newJson;
+        return jsonList;
     }
 
     public static int randomInt(int size) {
