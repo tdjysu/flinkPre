@@ -64,9 +64,9 @@ public class pushIntentMsg implements Runnable {
                         //将数据发送至kafka
                         Future fututre = producer.send(data);
                         fututre.get();
-System.out.println("msg = " + msg);
+//System.out.println("msg = " + msg);
                         line++;
-                    Thread.sleep(1000);
+                    Thread.sleep(20);
                 }
                 reader.close();
             } catch (Exception e) {

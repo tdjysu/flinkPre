@@ -19,6 +19,7 @@ public class pushMsgUtil {
 //            int threadNum = 5;
 //            int i = 0;
 //            while ( i <= threadNum){
+
 //                new Thread(pushIntent).start();
 //            }
             pushIntent.publishMessage(topic, recordCnt);

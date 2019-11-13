@@ -187,6 +187,7 @@ System.out.println("msg = " + msg);
         return number;
     }
 
+
     public static String getRandomDept(){
         String deptcode = "";
         String[] deptArray = {"114523201","012122931","115327801","021302456","033222102","011516832",
