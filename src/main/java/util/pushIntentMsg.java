@@ -66,7 +66,7 @@ public class pushIntentMsg implements Runnable {
                         fututre.get();
 //System.out.println("msg = " + msg);
                         line++;
-                    Thread.sleep(20);
+                    Thread.sleep(1000);
                 }
                 reader.close();
             } catch (Exception e) {

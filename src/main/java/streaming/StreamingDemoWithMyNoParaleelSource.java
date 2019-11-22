@@ -10,7 +10,7 @@ import streaming.custormSource.MyNoParalleSource;
 /**
  * 使用并行度为1的Source
  */
-public class StreamingDemoWithMyNoParaleelSource {
+public class  StreamingDemoWithMyNoParaleelSource {
     public static void main(String[] args) throws Exception{
 
 //       获取Flink的运行环境\

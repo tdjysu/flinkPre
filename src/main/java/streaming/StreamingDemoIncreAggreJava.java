@@ -21,7 +21,7 @@ public class StreamingDemoIncreAggreJava {
         DataStream<Tuple2<Integer, Integer>> inputData = text.map(new MapFunction<String, Tuple2<Integer, Integer>>() {
             @Override
             public Tuple2<Integer, Integer> map(String value) throws Exception {
-                return new Tuple2<Integer, Integer>(1, Integer.parseInt(value));
+                return new Tuple2<Integer, Integer>(Integer.parseInt(value),1);
             }
         });
 
